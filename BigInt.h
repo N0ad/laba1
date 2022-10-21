@@ -10,7 +10,7 @@ public:
 	BigInt() = default;
 	BigInt(int inp) {
 		data = "";
-		int a = inp;
+		int a = abs(inp);
 		if (inp < 0) {
 			min = 1;
 		}
@@ -19,7 +19,7 @@ public:
 		}
 		while (1) {
 			data = data + lib[a % 10];
-			if ((a < 10) && (a > -9)) {
+			if (a < 10) {
 				break;
 			}
 			a = a / 10;
@@ -56,10 +56,34 @@ public:
 
 	BigInt operator~() const;
 
-	BigInt& operator++(); //a++ 
-	const BigInt operator++(int) const; //++a
-	BigInt& operator--();
-	const BigInt operator--(int) const;
+	BigInt& operator++() {
+		BigInt b;
+		b.min = min;
+		b.data = data;
+		b = b + 1;
+		return b;
+	}; //a++ 
+	const BigInt operator++(int inp) const {
+		BigInt b;
+		b.min = min;
+		b.data = data;
+		b = b + inp;
+		return b;
+	};//++a
+	BigInt& operator--() {
+		BigInt b;
+		b.min = min;
+		b.data = data;
+		b = b - 1;
+		return b;
+	};
+	const BigInt operator--(int inp) const {
+		BigInt b;
+		b.min = min;
+		b.data = data;
+		b = b - inp;
+		return b;
+	};
 
 	BigInt& operator+=(const BigInt& b) {
 		std::string c = "";
@@ -98,8 +122,93 @@ public:
 		}
 		return res;
 	};
-	BigInt& operator*=(const BigInt&);
-	BigInt& operator-=(const BigInt&);
+	BigInt& operator*=(const BigInt& b) {
+		BigInt a, res, bb;
+		a.data = data;
+		a.min = 0;
+		res.data = "0";
+		res.min = 0;
+		bb.data = b.data;
+		bb.min = 0;
+		while (1) {
+			res = res + a;
+			bb--;
+			if (bb == 0) {
+				break;
+			}
+		}
+		res.min = (min + b.min) % 2;
+		return res;
+	};
+	BigInt& operator-=(const BigInt& b) {
+		std::string c = "";
+		std::string st = b.data;
+		int nxt = 0;
+		int d, sum;
+		BigInt res;
+		if (b.min == min) {
+			if (data == b.data) {
+				BigInt rtrn;
+				rtrn.min = 0;
+				rtrn.data = "0";
+				return rtrn;
+			};
+			if (data.length() > st.length()) {
+				for (int i = 0; i < data.length() - st.length(); i++) {
+					st = "0" + st;
+				}
+			}
+			if (data > 0) {
+				int f = 1;
+			}
+			else {
+				int f = 0;
+			}
+			for (int i = 0; i < data.length(); i++) {
+				sum = data[data.length() - i - 1] - '0';
+				d = st[data.length() - i - 1] - '0';
+				if (f == 1) {
+					sum = sum - d - nxt;
+				}
+				else {
+					sum = d - sum - nxt;
+				}
+				if (sum < 0) {
+					if (sum < -9) {
+						nxt = 2;
+					}
+					else {
+						nxt = 1;
+					}
+				}
+				else {
+					nxt 0;
+				}
+				sum = (10 + (sum % 10)) % 10;
+				c = lib[sum] + c;
+			}
+			while (1) {
+				if ((c[0] == '0') && (c.length() != 1) {
+					c.erase(0, 1);
+				}
+				else {
+					break;
+				}
+			}
+			res.data = c;
+			res.min = min;
+		}
+		else {
+			BigInt y;
+			res.min = 0;
+			res.data = data;
+			y.min = 0;
+			y.data = b.data;
+			res = res + y;
+			res.min = min;
+		}
+		return res;
+	};
 	BigInt& operator/=(const BigInt&);
 	BigInt& operator^=(const BigInt&);
 	BigInt& operator%=(const BigInt&);
