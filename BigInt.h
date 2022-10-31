@@ -551,6 +551,8 @@ std::ostream& operator<<(std::ostream& o, const BigInt& i) {
 		s = s + "-";
 	}
 	s = s + i.data;
+	o << s;
+	return o;
 };
 
 
