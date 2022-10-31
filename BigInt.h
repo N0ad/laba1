@@ -35,6 +35,17 @@ private:
 		}
 		return s;
 	};
+	BigInt binToBigint(std::string s) {
+		BigInt a = 1;
+		BigInt res = 0;
+		for (int i = s.length() - 1; i >= 0; i--) {
+			if (s[i] == '1') {
+				res = plus(res, a);
+			}
+			a = plus(a, a);
+		}
+		return res;
+	};
 	BigInt plus(const BigInt a, BigInt b) {
 		std::string c = "";
 		std::string st = b.data;
@@ -223,7 +234,7 @@ public:
 		int nxt = 0;
 		int d, sum;
 		BigInt res;
-		BigInt a;
+		BigInt a, bb;
 		a.bindata = bindata;
 		a.data = data;
 		a.min = 0;
@@ -232,8 +243,9 @@ public:
 			res.min = min;
 		}
 		else {
-			res = minus(a, b);
-			//вписать изменение знака при переходе через 0
+			bb.data = b.data;
+			bb.min = 1 - b.min;
+			res = minus(a, bb);
 		}
 		if (res.data == 0) {
 			res.min = 0;
@@ -241,21 +253,38 @@ public:
 		return res;
 	};
 	BigInt& operator*=(const BigInt& b) {
-		BigInt a, res, bb;
-		a.data = data;
-		a.min = 0;
-		res.data = "0";
-		res.min = 0;
-		bb.data = b.data;
-		bb.min = 0;
-		while (1) {
-			res = plus(res, a);
-			bb--;
-			if (bb == 0) {
-				break;
-			}
+		BigInt a, bb, res;
+		if ((data == "0") || (b.data == "0")) {
+			res = 0;
+			return res;
 		}
-		res.min = (min + b.min) % 2;
+		std::string s = "";
+		a.min = 0;
+		bb.min = 0;
+		res = 0;
+		int l, o;
+		if (data.length() > b.data.length()) {
+			a.data = data;
+			s = s + b.data;
+			l = b.data.length();
+		}
+		else {
+			a.data = b.data;
+			s = s + data;
+			l = data.length();
+		}
+		for (int i = l - 1; i >= 0; i--) {
+			o = s[i] - '0';
+			bb = 0;
+			for (int j = 0; j < o; j++) {
+				bb = plus(bb, a);
+			}
+			for (int j = 0; j < l - i - 1; j++) {
+				bb.data = bb.data + "0";
+			}
+			res = plus(res, bb);
+		}
+		res.min = (b.min + min) % 2;
 		return res;
 	};
 	BigInt& operator-=(const BigInt& b) {
@@ -271,7 +300,7 @@ public:
 		bb.data = 0;
 		if (b.min == min) {
 			res = minus(a, bb);
-			res.min =
+			res.min = (min + res.min) % 2;
 		}
 		else {
 			BigInt y;
@@ -279,14 +308,116 @@ public:
 			res.data = data;
 			y.min = 0;
 			y.data = b.data;
-			res = res + y;
+			res = plus(res, y);
 			res.min = min;
+		}
+		if (res.data == 0) {
+			res.min = 0;
 		}
 		return res;
 	};
-	BigInt& operator/=(const BigInt&);
+	BigInt& operator/=(const BigInt& b) {
+		if (b.data == "0") {
+			throw std::invalid_argument("Dividing by zero!");
+		}
+		BigInt bb, res, c;
+		std::string s;
+		if (data == "0") {
+			res = 0;
+			return res;
+		}
+		bb.min = 0;
+		c.min = 0;
+		res.data = "";
+		int l, o;
+		if (data.length() > b.data.length()) {
+			s = data;
+			c.data = b.data;
+			l = data.length();
+		}
+		else {
+			s = b.data;
+			c.data = data;
+			l = b.data.length();
+		}
+		bb.data = s;
+		bb.data.erase(l);
+		s.erase(0, l);
+		o = 0;
+		while (1) {
+			if (bb >= c) {
+				bb = minus(bb, c);
+				o = o + 1;
+			}
+			else {
+				res.data = res.data + lib[o];
+				if (s == "") {
+					break;
+				}
+				o = 0;
+				bb.data = bb.data + s[0];
+				s.erase(0, 1);
+			}
+		}
+		if ((min + b.min) % 2 == 1) {
+			res = res + 1;
+			res.min = 1;
+		}
+		else {
+			res.min = 0;
+		}
+		return res;
+	};
 	BigInt& operator^=(const BigInt&);
-	BigInt& operator%=(const BigInt&);
+	BigInt& operator%=(const BigInt&) {
+		if (b.data == "0") {
+			throw std::invalid_argument("Dividing by zero!");
+		}
+		BigInt bb, res, c;
+		std::string s;
+		if (data == "0") {
+			res = 0;
+			return res;
+		}
+		bb.min = 0;
+		c.min = 0;
+		int l, o;
+		if (data.length() > b.data.length()) {
+			s = data;
+			c.data = b.data;
+			l = data.length();
+		}
+		else {
+			s = b.data;
+			c.data = data;
+			l = b.data.length();
+		}
+		bb.data = s;
+		bb.data.erase(l);
+		s.erase(0, l);
+		o = 0;
+		while (1) {
+			if (bb >= c) {
+				bb = minus(bb, c);
+				o = o + 1;
+			}
+			else {
+				if (s == "") {
+					break;
+				}
+				o = 0;
+				bb.data = bb.data + s[0];
+				s.erase(0, 1);
+			}
+		}
+		if ((min + b.min) % 2 == 1) {
+			res = c - bb;
+			return res;
+		}
+		else {
+			return bb;
+		}
+	};
 	BigInt& operator&=(const BigInt&);
 	BigInt& operator|=(const BigInt&);
 
@@ -392,7 +523,14 @@ public:
 	};
 
 	operator int() const;
-	operator std::string() const;
+	operator std::string() const {
+		std::string s = "";
+		if (i.min == 1) {
+			s = s + "-";
+		}
+		s = s + i.data;
+		return s;
+	};
 
 	size_t size() const;  // size in bytes	
 };
@@ -407,6 +545,12 @@ BigInt operator&(const BigInt&, const BigInt&);
 BigInt operator|(const BigInt&, const BigInt&);
 
 
-std::ostream& operator<<(std::ostream& o, const BigInt& i);
+std::ostream& operator<<(std::ostream& o, const BigInt& i) {
+	std::string s = "";
+	if (i.min == 1) {
+		s = s + "-";
+	}
+	s = s + i.data;
+};
 
 
