@@ -197,7 +197,25 @@ public:
 		data = "" + a.data;
 	};  //возможно присваивание самому себе!
 
-	BigInt operator~() const;
+	BigInt operator~() const {
+		min = 1 - min;
+		BigInt a;
+		a.data = data;
+		a.min = 0;
+		std::string s = bigintToBin(a);
+		for (int i = s.length() - 1; i >= 0; i--) {
+			if (s[i] == "1") {
+				s[i] = "0";
+			}
+			else {
+				s[i] = "1";
+			}
+		}
+		a = binToBigint(s);
+		data = a.data;
+		a.min = min;
+		return a;
+	};
 
 	BigInt& operator++() {
 		BigInt b;
