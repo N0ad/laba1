@@ -235,7 +235,6 @@ public:
 		int d, sum;
 		BigInt res;
 		BigInt a, bb;
-		a.bindata = bindata;
 		a.data = data;
 		a.min = 0;
 		if (b.min == min) {
@@ -380,7 +379,47 @@ public:
 		min = res.min;
 		return res;
 	};
-	BigInt& operator^=(const BigInt&);
+	BigInt& operator^=(const BigInt& b) {
+		std::string as, bs, s;
+		BigInt abi, bbi;
+		abi.data = data;
+		bbi.data = b.data;
+		abi.min = 0;
+		bbi.min = 0;
+		as = bigintToBin(abi);
+		bs = bigintToBin(bbi);
+		int al = as.length();
+		int bl = bs.lenght();
+		int l;
+		if (al != bl) {
+			if (al < bl) {
+				for (int i = 0; i < bl - al; i++) {
+					as = "0" + as;
+				}
+				l = bl;
+			}
+			else {
+				for (int i = 0; i < al - bl; i++) {
+					bs = "0" + bs;
+				}
+				l = al;
+			}
+		}
+		s = "";
+		for (int i = l - 1; i >= 0; i--) {
+			if (as[i] == bs[i]) {
+				s = "0" + s;
+			}
+			else {
+				s = "1" + s;
+			}
+		}
+		BigInt res = binToBigint(s);
+		res.min = (min + b.min) % 2;
+		min = res.min;
+		data = rs.data;
+		return res;
+	};
 	BigInt& operator%=(const BigInt&) {
 		if (b.data == "0") {
 			throw std::invalid_argument("Dividing by zero!");
@@ -436,8 +475,88 @@ public:
 			return bb;
 		}
 	};
-	BigInt& operator&=(const BigInt&);
-	BigInt& operator|=(const BigInt&);
+	BigInt& operator&=(const BigInt&) {
+		std::string as, bs, s;
+		BigInt abi, bbi;
+		abi.data = data;
+		bbi.data = b.data;
+		abi.min = 0;
+		bbi.min = 0;
+		as = bigintToBin(abi);
+		bs = bigintToBin(bbi);
+		int al = as.length();
+		int bl = bs.lenght();
+		int l;
+		if (al != bl) {
+			if (al < bl) {
+				for (int i = 0; i < bl - al; i++) {
+					as = "0" + as;
+				}
+				l = bl;
+			}
+			else {
+				for (int i = 0; i < al - bl; i++) {
+					bs = "0" + bs;
+				}
+				l = al;
+			}
+		}
+		s = "";
+		for (int i = l - 1; i >= 0; i--) {
+			if ((as[i] == "1") && (bs[i] == "1")) {
+				s = "0" + s;
+			}
+			else {
+				s = "1" + s;
+			}
+		}
+		BigInt res = binToBigint(s);
+		res.min = (min + b.min) % 2;
+		min = res.min;
+		data = rs.data;
+		return res;
+	};
+	BigInt& operator|=(const BigInt&) {
+		std::string as, bs, s;
+		BigInt abi, bbi;
+		abi.data = data;
+		bbi.data = b.data;
+		abi.min = 0;
+		bbi.min = 0;
+		as = bigintToBin(abi);
+		bs = bigintToBin(bbi);
+		int al = as.length();
+		int bl = bs.lenght();
+		int l;
+		if (al != bl) {
+			if (al < bl) {
+				for (int i = 0; i < bl - al; i++) {
+					as = "0" + as;
+				}
+				l = bl;
+			}
+			else {
+				for (int i = 0; i < al - bl; i++) {
+					bs = "0" + bs;
+				}
+				l = al;
+			}
+		}
+		s = "";
+		for (int i = l - 1; i >= 0; i--) {
+			if ((as[i] == "1") || (bs[i] == "1")) {
+				s = "0" + s;
+			}
+			else {
+				s = "1" + s;
+			}
+		}
+		BigInt res = binToBigint(s);
+		res.min = (min + b.min) % 2;
+		min = res.min;
+		data = rs.data;
+		return res;
+	};
 
 	BigInt operator+() const;  // unary +
 	BigInt operator-() const;  // unary -
@@ -540,7 +659,28 @@ public:
 		}
 	};
 
-	operator int() const;
+	operator int() const {
+		if (((data > "2147483648") && (min == 1)) || ((data > "2147483647") && (min == 0))) {
+			throw std::invalid_argument("Argument bigger than max value of int.");
+		}
+		else {
+			int res = 0;
+			int a;
+			if (min == 1) {
+				for (int i = data.length() - 1; i >= 0; i--) {
+					a = data[i] - '0';
+					res = res - a;
+				}
+			}
+			else {
+				for (int i = data.length() - 1; i >= 0; i--) {
+					a = data[i] - '0';
+					res = res + a;
+				}
+			}
+			return res;
+		}
+	};
 	operator std::string() const {
 		std::string s = "";
 		if (i.min == 1) {
@@ -550,104 +690,107 @@ public:
 		return s;
 	};
 
-	size_t size() const;  // size in bytes	
+	size_t size() const {
+		int res = sizeof(char) * (data.length() + 1);
+		res = res + sizeof(int);
+		return res;
+	};  // size in bytes	
 };
 
-BigInt operator+(const BigInt&, const BigInt&) {
+BigInt operator+(const BigInt& a, const BigInt& b) {
 	std::string c = "";
 	std::string st = b.data;
 	int nxt = 0;
 	int d, sum;
 	BigInt res;
-	BigInt a, bb;
-	a.bindata = bindata;
-	a.data = data;
-	a.min = 0;
-	if (b.min == min) {
-		res = plus(a, b);
-		res.min = min;
+	BigInt aa, bb;
+	aa.data = a.data;
+	aa.min = 0;
+	if (b.min == a.min) {
+		res = plus(aa, b);
+		res.min = a.min;
 	}
 	else {
 		bb.data = b.data;
 		bb.min = 1 - b.min;
-		res = minus(a, bb);
+		res = minus(aa, bb);
 	}
 	if (res.data == 0) {
 		res.min = 0;
 	}
 	return res;
 };
-BigInt operator-(const BigInt&, const BigInt&) {
-	BigInt a, bb, res;
-	if ((data == "0") || (b.data == "0")) {
+BigInt operator-(const BigInt& a, const BigInt& b) {
+	BigInt aa, bb, res;
+	if ((a.data == "0") || (b.data == "0")) {
 		res = 0;
 		return res;
 	}
 	std::string s = "";
-	a.min = 0;
+	aa.min = 0;
 	bb.min = 0;
 	res = 0;
 	int l, o;
-	if (data.length() > b.data.length()) {
-		a.data = data;
+	if (a.data.length() > b.data.length()) {
+		aa.data = a.data;
 		s = s + b.data;
 		l = b.data.length();
 	}
 	else {
-		a.data = b.data;
-		s = s + data;
-		l = data.length();
+		aa.data = b.data;
+		s = s + a.data;
+		l = a.data.length();
 	}
 	for (int i = l - 1; i >= 0; i--) {
 		o = s[i] - '0';
 		bb = 0;
 		for (int j = 0; j < o; j++) {
-			bb = plus(bb, a);
+			bb = plus(bb, aa);
 		}
 		for (int j = 0; j < l - i - 1; j++) {
 			bb.data = bb.data + "0";
 		}
 		res = plus(res, bb);
 	}
-	res.min = (b.min + min) % 2;
+	res.min = (b.min + a.min) % 2;
 	return res;
 };
-BigInt operator*(const BigInt&, const BigInt&) {
+BigInt operator*(const BigInt& a, const BigInt& b) {
 	std::string c = "";
 	std::string st = b.data;
 	int nxt = 0;
 	int d, sum;
 	BigInt res;
-	BigInt a, bb;
-	a.data = data;
+	BigInt aa, bb;
+	aa.data = a.data;
 	bb.data = b.data
-		a.min = 0;
+		aa.min = 0;
 	bb.data = 0;
-	if (b.min == min) {
-		res = minus(a, bb);
-		res.min = (min + res.min) % 2;
+	if (b.min == a.min) {
+		res = minus(aa, bb);
+		res.min = (a.min + res.min) % 2;
 	}
 	else {
 		BigInt y;
 		res.min = 0;
-		res.data = data;
+		res.data = a.data;
 		y.min = 0;
 		y.data = b.data;
 		res = plus(res, y);
-		res.min = min;
+		res.min = a.min;
 	}
 	if (res.data == 0) {
 		res.min = 0;
 	}
 	return res;
 };
-BigInt operator/(const BigInt&, const BigInt&) {
+BigInt operator/(const BigInt& a, const BigInt& b) {
 	if (b.data == "0") {
 		throw std::invalid_argument("Dividing by zero!");
 	}
 	BigInt bb, res, c;
 	std::string s;
-	if (data == "0") {
+	if (a.data == "0") {
 		res = 0;
 		return res;
 	}
@@ -655,14 +798,14 @@ BigInt operator/(const BigInt&, const BigInt&) {
 	c.min = 0;
 	res.data = "";
 	int l, o;
-	if (data.length() > b.data.length()) {
-		s = data;
+	if (a.data.length() > b.data.length()) {
+		s = a.data;
 		c.data = b.data;
-		l = data.length();
+		l = a.data.length();
 	}
 	else {
 		s = b.data;
-		c.data = data;
+		c.data = a.data;
 		l = b.data.length();
 	}
 	bb.data = s;
@@ -684,7 +827,7 @@ BigInt operator/(const BigInt&, const BigInt&) {
 			s.erase(0, 1);
 		}
 	}
-	if ((min + b.min) % 2 == 1) {
+	if ((a.min + b.min) % 2 == 1) {
 		res = res + 1;
 		res.min = 1;
 	}
@@ -693,28 +836,66 @@ BigInt operator/(const BigInt&, const BigInt&) {
 	}
 	return res;
 };
-BigInt operator^(const BigInt&, const BigInt&);
-BigInt operator%(const BigInt&, const BigInt&) {
+BigInt operator^(const BigInt& a, const BigInt& b) {
+	std::string as, bs, s;
+	BigInt abi, bbi;
+	abi.data = a.data;
+	bbi.data = b.data;
+	abi.min = 0;
+	bbi.min = 0;
+	as = bigintToBin(abi);
+	bs = bigintToBin(bbi);
+	int al = as.length();
+	int bl = bs.lenght();
+	int l;
+	if (al != bl) {
+		if (al < bl) {
+			for (int i = 0; i < bl - al; i++) {
+				as = "0" + as;
+			}
+			l = bl;
+		}
+		else {
+			for (int i = 0; i < al - bl; i++) {
+				bs = "0" + bs;
+			}
+			l = al;
+		}
+	}
+	s = "";
+	for (int i = l - 1; i >= 0; i--) {
+		if (as[i] == bs[i]) {
+			s = "0" + s;
+		}
+		else {
+			s = "1" + s;
+		}
+	}
+	BigInt res = binToBigint(s);
+	res.min = (a.min + b.min) % 2;
+	return res;
+};
+BigInt operator%(const BigInt& a, const BigInt& b) {
 	if (b.data == "0") {
 		throw std::invalid_argument("Dividing by zero!");
 	}
 	BigInt bb, res, c;
 	std::string s;
-	if (data == "0") {
+	if (a.data == "0") {
 		res = 0;
 		return res;
 	}
 	bb.min = 0;
 	c.min = 0;
 	int l, o;
-	if (data.length() > b.data.length()) {
-		s = data;
+	if (a.data.length() > b.data.length()) {
+		s = a.data;
 		c.data = b.data;
-		l = data.length();
+		l = a.data.length();
 	}
 	else {
 		s = b.data;
-		c.data = data;
+		c.data = a.data;
 		l = b.data.length();
 	}
 	bb.data = s;
@@ -735,7 +916,7 @@ BigInt operator%(const BigInt&, const BigInt&) {
 			s.erase(0, 1);
 		}
 	}
-	if ((min + b.min) % 2 == 1) {
+	if ((a.min + b.min) % 2 == 1) {
 		res = c - bb;
 		return res;
 	}
@@ -743,9 +924,84 @@ BigInt operator%(const BigInt&, const BigInt&) {
 		return bb;
 	}
 };
-BigInt operator&(const BigInt&, const BigInt&);
-BigInt operator|(const BigInt&, const BigInt&);
-//добавить переменные в описание и перед data/min
+BigInt operator&(const BigInt& a, const BigInt& b) {
+	std::string as, bs, s;
+	BigInt abi, bbi;
+	abi.data = a.data;
+	bbi.data = b.data;
+	abi.min = 0;
+	bbi.min = 0;
+	as = bigintToBin(abi);
+	bs = bigintToBin(bbi);
+	int al = as.length();
+	int bl = bs.lenght();
+	int l;
+	if (al != bl) {
+		if (al < bl) {
+			for (int i = 0; i < bl - al; i++) {
+				as = "0" + as;
+			}
+			l = bl;
+		}
+		else {
+			for (int i = 0; i < al - bl; i++) {
+				bs = "0" + bs;
+			}
+			l = al;
+		}
+	}
+	s = "";
+	for (int i = l - 1; i >= 0; i--) {
+		if ((as[i] == "1") && (bs[i] == "1")) {
+			s = "0" + s;
+		}
+		else {
+			s = "1" + s;
+		}
+	}
+	BigInt res = binToBigint(s);
+	res.min = (a.min + b.min) % 2;
+	return res;
+};
+BigInt operator|(const BigInt& a, const BigInt& b) {
+	std::string as, bs, s;
+	BigInt abi, bbi;
+	abi.data = a.data;
+	bbi.data = b.data;
+	abi.min = 0;
+	bbi.min = 0;
+	as = bigintToBin(abi);
+	bs = bigintToBin(bbi);
+	int al = as.length();
+	int bl = bs.lenght();
+	int l;
+	if (al != bl) {
+		if (al < bl) {
+			for (int i = 0; i < bl - al; i++) {
+				as = "0" + as;
+			}
+			l = bl;
+		}
+		else {
+			for (int i = 0; i < al - bl; i++) {
+				bs = "0" + bs;
+			}
+			l = al;
+		}
+	}
+	s = "";
+	for (int i = l - 1; i >= 0; i--) {
+		if ((as[i] == "1") || (bs[i] == "1")) {
+			s = "0" + s;
+		}
+		else {
+			s = "1" + s;
+		}
+	}
+	BigInt res = binToBigint(s);
+	res.min = (a.min + b.min) % 2;
+	return res;
+};
 
 std::ostream& operator<<(std::ostream& o, const BigInt& i) {
 	std::string s = "";
