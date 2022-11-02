@@ -576,8 +576,18 @@ public:
 		return res;
 	};
 
-	BigInt operator+() const;  // unary +
-	BigInt operator-() const;  // unary -
+	BigInt operator+() const {
+		BigInt res;
+		res.min = min;
+		res.data = data;
+		return res;
+	};  // unary +
+	BigInt operator-() const {
+		BigInt res;
+		res.min = 1 - min;
+		res.data = data;
+		return res;
+	};  // unary -
 
 	bool operator==(const BigInt& b) const {
 		if ((b.data == data) && (b.min == min)) {
@@ -709,7 +719,7 @@ public:
 	};
 
 	size_t size() const {
-		int res = sizeof(char) * (data.length() + 1);
+		int res = sizeof(char) * data.length();
 		res = res + sizeof(int);
 		return res;
 	};  // size in bytes	
