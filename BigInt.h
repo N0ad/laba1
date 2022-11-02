@@ -4,26 +4,28 @@
 #include <iostream>
 #pragma once
 class BigInt {
-private:
+	friend BigInt operator+(const BigInt& a, const BigInt& b);
+public:
 	char lib[11] = "0123456789";
-	std::string bigintToBin(BigInt b) {
+	std::string bigintToBin(BigInt b) const {
 		BigInt a = 1;
+		BigInt bb = b;
 		BigInt prev;
-		std::string  s = ""
+		std::string  s = "";
 		while (1) {
-			if (a >= b) {
+			if (a >= bb) {
 				break;
 			}
 			prev = a;
 			a = a + a;
 		}
-		if (a > b) {
+		if (a > bb) {
 			a = prev;
 		}
 		while (1) {
-			if (a <= b) {
+			if (a <= bb) {
 				s = s + "1";
-				b = b - a;
+				bb = bb - a;
 			}
 			else {
 				s = s + "0";
@@ -31,22 +33,23 @@ private:
 			if (a.data == "1") {
 				break;
 			}
-			a = a / 2;
+			BigInt dva = 2;
+			a = a / dva;
 		}
 		return s;
 	};
-	BigInt binToBigint(std::string s) {
+	BigInt binToBigint(std::string s) const{
 		BigInt a = 1;
 		BigInt res = 0;
 		for (int i = s.length() - 1; i >= 0; i--) {
 			if (s[i] == '1') {
-				res = plus(res, a);
+				res = res + a;
 			}
-			a = plus(a, a);
+			a = a + a;
 		}
 		return res;
 	};
-	BigInt plus(const BigInt a, BigInt b) {
+	BigInt plus(BigInt a, BigInt b) {
 		std::string c = "";
 		std::string st = b.data;
 		std::string s = a.data;
@@ -79,7 +82,7 @@ private:
 		res.min = 0;
 		return res;
 	};
-	BigInt minus(const BigInt a, BigInt b) {
+	BigInt minus(BigInt a, BigInt b) {
 		std::string c = "";
 		std::string st = b.data;
 		std::string s = a.data;
@@ -97,11 +100,12 @@ private:
 				st = "0" + st;
 			}
 		}
+		int f;
 		if (a > b) {
-			int f = 1;
+			f = 1;
 		}
 		else {
-			int f = 0;
+			f = 0;
 		}
 		for (int i = 0; i < s.length(); i++) {
 			sum = s[s.length() - i - 1] - '0';
@@ -121,7 +125,7 @@ private:
 				}
 			}
 			else {
-				nxt 0;
+				nxt = 0;
 			}
 			sum = (10 + (sum % 10)) % 10;
 			c = lib[sum] + c;
@@ -138,7 +142,7 @@ private:
 		res.min = 1 - f;
 		return res;
 	};
-public:
+
 	BigInt() = default;
 	BigInt(int inp) {
 		data = "";
@@ -198,22 +202,20 @@ public:
 	};  //возможно присваивание самому себе!
 
 	BigInt operator~() const {
-		min = 1 - min;
 		BigInt a;
 		a.data = data;
 		a.min = 0;
 		std::string s = bigintToBin(a);
 		for (int i = s.length() - 1; i >= 0; i--) {
-			if (s[i] == "1") {
-				s[i] = "0";
+			if (s[i] == '1') {
+				s[i] = '0';
 			}
 			else {
-				s[i] = "1";
+				s[i] = '1';
 			}
 		}
 		a = binToBigint(s);
-		data = a.data;
-		a.min = min;
+		a.min = 1 - min;
 		return a;
 	};
 
@@ -221,28 +223,32 @@ public:
 		BigInt b;
 		b.min = min;
 		b.data = data;
-		b = b + 1;
+		BigInt odin = 1;
+		b = b + odin;
 		return b;
 	}; //a++ 
 	const BigInt operator++(int inp) const {
-		BigInt b;
+		BigInt b, in;
+		in = inp;
 		b.min = min;
 		b.data = data;
-		b = b + inp;
+		b = b + in;
 		return b;
 	};//++a
 	BigInt& operator--() {
 		BigInt b;
+		BigInt odin = 1;
 		b.min = min;
 		b.data = data;
-		b = b - 1;
+		b = b - odin;
 		return b;
 	};
 	const BigInt operator--(int inp) const {
 		BigInt b;
+		BigInt in = inp;
 		b.min = min;
 		b.data = data;
-		b = b - inp;
+		b = b - in;
 		return b;
 	};
 
@@ -264,7 +270,7 @@ public:
 			bb.min = 1 - b.min;
 			res = minus(a, bb);
 		}
-		if (res.data == 0) {
+		if (res.data == "0") {
 			res.min = 0;
 		}
 		data = res.data;
@@ -318,9 +324,9 @@ public:
 		BigInt res;
 		BigInt a, bb;
 		a.data = data;
-		bb.data = b.data
+		bb.data = b.data;
 		a.min = 0;
-		bb.data = 0;
+		bb.data = "0";
 		if (b.min == min) {
 			res = minus(a, bb);
 			res.min = (min + res.min) % 2;
@@ -334,7 +340,7 @@ public:
 			res = plus(res, y);
 			res.min = min;
 		}
-		if (res.data == 0) {
+		if (res.data == "0") {
 			res.min = 0;
 		}
 		data = res.data;
@@ -387,7 +393,8 @@ public:
 			}
 		}
 		if ((min + b.min) % 2 == 1) {
-			res = res + 1;
+			BigInt odin = 1;
+			res = res + odin;
 			res.min = 1;
 		}
 		else {
@@ -407,7 +414,7 @@ public:
 		as = bigintToBin(abi);
 		bs = bigintToBin(bbi);
 		int al = as.length();
-		int bl = bs.lenght();
+		int bl = bs.length();
 		int l;
 		if (al != bl) {
 			if (al < bl) {
@@ -435,10 +442,10 @@ public:
 		BigInt res = binToBigint(s);
 		res.min = (min + b.min) % 2;
 		min = res.min;
-		data = rs.data;
+		data = res.data;
 		return res;
 	};
-	BigInt& operator%=(const BigInt&) {
+	BigInt& operator%=(const BigInt& b) {
 		if (b.data == "0") {
 			throw std::invalid_argument("Dividing by zero!");
 		}
@@ -493,7 +500,7 @@ public:
 			return bb;
 		}
 	};
-	BigInt& operator&=(const BigInt&) {
+	BigInt& operator&=(const BigInt& b) {
 		std::string as, bs, s;
 		BigInt abi, bbi;
 		abi.data = data;
@@ -503,7 +510,7 @@ public:
 		as = bigintToBin(abi);
 		bs = bigintToBin(bbi);
 		int al = as.length();
-		int bl = bs.lenght();
+		int bl = bs.length();
 		int l;
 		if (al != bl) {
 			if (al < bl) {
@@ -521,7 +528,7 @@ public:
 		}
 		s = "";
 		for (int i = l - 1; i >= 0; i--) {
-			if ((as[i] == "1") && (bs[i] == "1")) {
+			if ((as[i] == '1') && (bs[i] == '1')) {
 				s = "0" + s;
 			}
 			else {
@@ -531,10 +538,10 @@ public:
 		BigInt res = binToBigint(s);
 		res.min = (min + b.min) % 2;
 		min = res.min;
-		data = rs.data;
+		data = res.data;
 		return res;
 	};
-	BigInt& operator|=(const BigInt&) {
+	BigInt& operator|=(const BigInt& b) {
 		std::string as, bs, s;
 		BigInt abi, bbi;
 		abi.data = data;
@@ -544,7 +551,7 @@ public:
 		as = bigintToBin(abi);
 		bs = bigintToBin(bbi);
 		int al = as.length();
-		int bl = bs.lenght();
+		int bl = bs.length();
 		int l;
 		if (al != bl) {
 			if (al < bl) {
@@ -562,7 +569,7 @@ public:
 		}
 		s = "";
 		for (int i = l - 1; i >= 0; i--) {
-			if ((as[i] == "1") || (bs[i] == "1")) {
+			if ((as[i] == '1') || (bs[i] == '1')) {
 				s = "0" + s;
 			}
 			else {
@@ -572,7 +579,7 @@ public:
 		BigInt res = binToBigint(s);
 		res.min = (min + b.min) % 2;
 		min = res.min;
-		data = rs.data;
+		data = res.data;
 		return res;
 	};
 
@@ -711,10 +718,10 @@ public:
 	};
 	operator std::string() const {
 		std::string s = "";
-		if (i.min == 1) {
+		if (min == 1) {
 			s = s + "-";
 		}
-		s = s + i.data;
+		s = s + data;
 		return s;
 	};
 
@@ -735,15 +742,15 @@ BigInt operator+(const BigInt& a, const BigInt& b) {
 	aa.data = a.data;
 	aa.min = 0;
 	if (b.min == a.min) {
-		res = plus(aa, b);
+		res = res.plus(aa, b);
 		res.min = a.min;
 	}
 	else {
 		bb.data = b.data;
 		bb.min = 1 - b.min;
-		res = minus(aa, bb);
+		res = res.minus(aa, bb);
 	}
-	if (res.data == 0) {
+	if (res.data == "0") {
 		res.min = 0;
 	}
 	return res;
@@ -773,12 +780,12 @@ BigInt operator-(const BigInt& a, const BigInt& b) {
 		o = s[i] - '0';
 		bb = 0;
 		for (int j = 0; j < o; j++) {
-			bb = plus(bb, aa);
+			bb = bb.plus(bb, aa);
 		}
 		for (int j = 0; j < l - i - 1; j++) {
 			bb.data = bb.data + "0";
 		}
-		res = plus(res, bb);
+		res = res.plus(res, bb);
 	}
 	res.min = (b.min + a.min) % 2;
 	return res;
@@ -791,11 +798,11 @@ BigInt operator*(const BigInt& a, const BigInt& b) {
 	BigInt res;
 	BigInt aa, bb;
 	aa.data = a.data;
-	bb.data = b.data
+	bb.data = b.data;
 		aa.min = 0;
-	bb.data = 0;
+	bb.data = "0";
 	if (b.min == a.min) {
-		res = minus(aa, bb);
+		res = res.minus(aa, bb);
 		res.min = (a.min + res.min) % 2;
 	}
 	else {
@@ -804,10 +811,10 @@ BigInt operator*(const BigInt& a, const BigInt& b) {
 		res.data = a.data;
 		y.min = 0;
 		y.data = b.data;
-		res = plus(res, y);
+		res = res.plus(res, y);
 		res.min = a.min;
 	}
-	if (res.data == 0) {
+	if (res.data == "0") {
 		res.min = 0;
 	}
 	return res;
@@ -842,11 +849,11 @@ BigInt operator/(const BigInt& a, const BigInt& b) {
 	o = 0;
 	while (1) {
 		if (bb >= c) {
-			bb = minus(bb, c);
+			bb = bb.minus(bb, c);
 			o = o + 1;
 		}
 		else {
-			res.data = res.data + lib[o];
+			res.data = res.data + res.lib[o];
 			if (s == "") {
 				break;
 			}
@@ -856,7 +863,8 @@ BigInt operator/(const BigInt& a, const BigInt& b) {
 		}
 	}
 	if ((a.min + b.min) % 2 == 1) {
-		res = res + 1;
+		BigInt odin = 1;
+		res = res + odin;
 		res.min = 1;
 	}
 	else {
@@ -871,10 +879,10 @@ BigInt operator^(const BigInt& a, const BigInt& b) {
 	bbi.data = b.data;
 	abi.min = 0;
 	bbi.min = 0;
-	as = bigintToBin(abi);
-	bs = bigintToBin(bbi);
+	as = abi.bigintToBin(abi);
+	bs = bbi.bigintToBin(bbi);
 	int al = as.length();
-	int bl = bs.lenght();
+	int bl = bs.length();
 	int l;
 	if (al != bl) {
 		if (al < bl) {
@@ -899,7 +907,7 @@ BigInt operator^(const BigInt& a, const BigInt& b) {
 			s = "1" + s;
 		}
 	}
-	BigInt res = binToBigint(s);
+	BigInt res = res.binToBigint(s);
 	res.min = (a.min + b.min) % 2;
 	return res;
 };
@@ -932,7 +940,7 @@ BigInt operator%(const BigInt& a, const BigInt& b) {
 	o = 0;
 	while (1) {
 		if (bb >= c) {
-			bb = minus(bb, c);
+			bb = bb.minus(bb, c);
 			o = o + 1;
 		}
 		else {
@@ -959,10 +967,10 @@ BigInt operator&(const BigInt& a, const BigInt& b) {
 	bbi.data = b.data;
 	abi.min = 0;
 	bbi.min = 0;
-	as = bigintToBin(abi);
-	bs = bigintToBin(bbi);
+	as = abi.bigintToBin(abi);
+	bs = bbi.bigintToBin(bbi);
 	int al = as.length();
-	int bl = bs.lenght();
+	int bl = bs.length();
 	int l;
 	if (al != bl) {
 		if (al < bl) {
@@ -980,14 +988,14 @@ BigInt operator&(const BigInt& a, const BigInt& b) {
 	}
 	s = "";
 	for (int i = l - 1; i >= 0; i--) {
-		if ((as[i] == "1") && (bs[i] == "1")) {
+		if ((as[i] == '1') && (bs[i] == '1')) {
 			s = "0" + s;
 		}
 		else {
 			s = "1" + s;
 		}
 	}
-	BigInt res = binToBigint(s);
+	BigInt res = res.binToBigint(s);
 	res.min = (a.min + b.min) % 2;
 	return res;
 };
@@ -998,10 +1006,10 @@ BigInt operator|(const BigInt& a, const BigInt& b) {
 	bbi.data = b.data;
 	abi.min = 0;
 	bbi.min = 0;
-	as = bigintToBin(abi);
-	bs = bigintToBin(bbi);
+	as = abi.bigintToBin(abi);
+	bs = bbi.bigintToBin(bbi);
 	int al = as.length();
-	int bl = bs.lenght();
+	int bl = bs.length();
 	int l;
 	if (al != bl) {
 		if (al < bl) {
@@ -1019,14 +1027,14 @@ BigInt operator|(const BigInt& a, const BigInt& b) {
 	}
 	s = "";
 	for (int i = l - 1; i >= 0; i--) {
-		if ((as[i] == "1") || (bs[i] == "1")) {
+		if ((as[i] == '1') || (bs[i] == '1')) {
 			s = "0" + s;
 		}
 		else {
 			s = "1" + s;
 		}
 	}
-	BigInt res = binToBigint(s);
+	BigInt res = res.binToBigint(s);
 	res.min = (a.min + b.min) % 2;
 	return res;
 };
